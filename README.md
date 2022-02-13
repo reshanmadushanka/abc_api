@@ -42,3 +42,10 @@ User Name - admin@admin.com
 
 Password - password
 
+## Api Documentation Swagger
+
+get yml file from https://github.com/reshanmadushanka/abc_api/blob/main/ABC_CRM.yaml 
+
+and render through  https://editor.swagger.io/
+
+
