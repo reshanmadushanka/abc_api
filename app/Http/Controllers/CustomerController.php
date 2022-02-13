@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\CutomerResource;
+use App\Imports\UsersImport;
 use App\Repositories\CustomerRepository;
 use Illuminate\Http\Request;
+use Excel;
 
 class CustomerController extends Controller
 {
@@ -75,7 +77,7 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        if ($customer = $this->customer_repo->get($id)) {
+        if ($customer = $this->customer_repo->get($id)->first()) {
             return new CutomerResource($customer);
         }
 
@@ -128,8 +130,31 @@ class CustomerController extends Controller
     public function destroy($id)
     {
         if ($customer = $this->customer_repo->delete($id)) {
-            return response()->json(['res' => 'Customer updated successfully.!', 'status' => 1]);
+            return response()->json(['res' => 'Customer delete successfully.!', 'status' => 1]);
         }
-        return response()->json(['res' => 'Customer Registration Failed!', 'status' => 0]);
+        return response()->json(['res' => 'Customer delete Failed!', 'status' => 0]);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     * import CSV
+     */
+    public function fileImport(Request $request)
+    {
+        if ($request->file) {
+            $import = new UsersImport();
+            \Excel::import($import, $request->file);
+            return response()->json([
+                'message' => $import->data->count() . " records successfully uploaded"
+            ]);
+        } else {
+            throw new \Exception('No file was uploaded', Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function search(){
+        $customer = $this->customer_repo->get();
+
     }
 }

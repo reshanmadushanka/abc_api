@@ -23,5 +23,6 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::post('/sign-out', [AuthenticationController::class, 'logout']);
     //CUSTOMERS
     Route::resource('customers', \App\Http\Controllers\CustomerController::class);
+    Route::post('customers-import', [\App\Http\Controllers\CustomerController::class,'fileImport']);
 });
 

@@ -14,19 +14,21 @@ class CustomerRepository
      */
     public function get($id = '')
     {
-        $customer = Customer::with('phone')
+        return Customer::with('phone')
             ->when($id, function ($q) use ($id) {
                 $q->where('id', $id);
             })->when(request('key'), function ($q) {
-                $q->where('first_name', "LIKE", "%" . request('id') . "%")
-                    ->orWhere('last_name', request('key'))
-                    ->orWhere('email', request('key'));
+                $q->where('first_name', "LIKE", "%" . request('key') . "%")
+                    ->orWhere('last_name', "LIKE", "%" . request('key') . "%")
+                    ->orWhere('email', "LIKE", "%" . request('key') . "%");
             })
             ->get();
-
-        return $customer;
     }
 
+    /**
+     * @return false|mixed
+     * save customer to db
+     */
     public function save()
     {
 
@@ -53,6 +55,11 @@ class CustomerRepository
 
     }
 
+    /**
+     * @param $id
+     * @return false
+     * update customer
+     */
     public function update($id)
     {
         $customer = Customer::find($id);
@@ -62,10 +69,10 @@ class CustomerRepository
         if ($customer->update()) {
             if (request()->filled('phone')) {
                 foreach (request('phone') as $phone) {
-                    CustomerPhone::firstOrCreate(
-                        ['customerId' => $id],
-                        ['phone' => $phone]
-                    );
+                    CustomerPhone::firstOrCreate([
+                        'customerId' => $id,
+                        'phone' => $phone,
+                    ]);
                 }
             }
             return $customer;
@@ -73,6 +80,11 @@ class CustomerRepository
         return false;
     }
 
+    /**
+     * @param $id
+     * @return false
+     * delete customer from db
+     */
     public function delete($id = "")
     {
         $customer = Customer::find($id);
