@@ -48,4 +48,8 @@ get yml file from https://github.com/reshanmadushanka/abc_api/blob/main/ABC_CRM.
 
 and render through  https://editor.swagger.io/
 
+## Sample CSV file
+
+find the sample csv file on project root
+
 
