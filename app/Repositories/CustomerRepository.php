@@ -22,7 +22,7 @@ class CustomerRepository
                     ->orWhere('last_name', "LIKE", "%" . request('key') . "%")
                     ->orWhere('email', "LIKE", "%" . request('key') . "%");
             })
-            ->get();
+            ->paginate(10);
     }
 
     /**

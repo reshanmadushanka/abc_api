@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 /**
  * @OA\Info(
- *    title="Your super  ApplicationAPI",
+ *    title="ABC CRM",
  *    version="1.0.0",
  * )
  */
