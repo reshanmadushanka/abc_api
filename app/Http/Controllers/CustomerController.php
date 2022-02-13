@@ -7,6 +7,7 @@ use App\Imports\UsersImport;
 use App\Repositories\CustomerRepository;
 use Illuminate\Http\Request;
 use Excel;
+use Validator;
 
 class CustomerController extends Controller
 {
@@ -44,15 +45,10 @@ class CustomerController extends Controller
         //get customers
         $customer = $this->customer_repo->get();
         if (isset($customer)) {
-            return response()->json($customer);
+            return CutomerResource::collection($customer);
         }
         return $response = response()->json(['data' => 'Resource not found'], 404);
 
-    }
-
-    public function create()
-    {
-        //
     }
 
     /**
@@ -86,12 +82,14 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         //validate incoming request
-        $this->validate($request, [
+        $validator = Validator::make($request->all(), [
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'email' => 'required|email',
         ]);
-
+        if ($validator->fails()) {
+            return response()->json(['res' => $validator->errors()->first(), 'status' => 0]);
+        }
         try {
             $user = $this->customer_repo->save();
             //return successful response
@@ -143,14 +141,9 @@ class CustomerController extends Controller
             return new CutomerResource($customer);
         }
 
-        return $response = response()->json(['data' => 'Resource not found'], 404);
+        return $response = response()->json(['res' => 'Customer Not Fount!', 'status' => 0]);
     }
 
-
-    public function edit($id)
-    {
-        //
-    }
 
     /**
      * @OA\Put(
@@ -195,20 +188,24 @@ class CustomerController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $this->validate($request, [
+        //validate incoming request
+        $validator = Validator::make($request->all(), [
             'first_name' => 'required|string',
             'last_name' => 'required|string',
-            'email' => 'required|email|unique:users',
+            'email' => 'required|email',
         ]);
+        if ($validator->fails()) {
+            return response()->json(['res' => $validator->errors()->first(), 'status' => 0]);
+        }
 
         try {
             $customer = $this->customer_repo->update($id);
             //return successful response
-            return response()->json(['res' => 'Customer updated successfully.!', 'status' => 1]);
+            return response()->json(['res' => 'Customer Update successfully.!', 'status' => 1]);
 
         } catch (\Exception $e) {
             //return error message
-            return response()->json(['res' => 'Customer Registration Failed!', 'status' => 0]);
+            return response()->json(['res' => 'Customer Update Failed!', 'status' => 0]);
         }
     }
 
@@ -250,7 +247,7 @@ class CustomerController extends Controller
     public function destroy($id)
     {
         if ($customer = $this->customer_repo->delete($id)) {
-            return response()->json(['res' => 'Customer delete successfully.!', 'status' => 1]);
+            return response()->json(['res' => 'Customer deleted successfully.!', 'status' => 1]);
         }
         return response()->json(['res' => 'Customer delete Failed!', 'status' => 0]);
     }
@@ -289,19 +286,19 @@ class CustomerController extends Controller
      */
     public function fileImport(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'file' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['res' => $validator->errors()->first(), 'status' => 0]);
+        }
+
         if ($request->file) {
             $import = new UsersImport();
             \Excel::import($import, $request->file);
-            return response()->json([
-                'message' => $import->data->count() . " records successfully uploaded"
-            ]);
+            return response()->json(['res' => $import->data->count() . " records successfully uploaded", 'status' => 1]);
         } else {
-            throw new \Exception('No file was uploaded', Response::HTTP_BAD_REQUEST);
+            return response()->json(['res' => 'File Upload Failed!', 'status' => 0]);
         }
-    }
-
-    public function search(){
-        $customer = $this->customer_repo->get();
-
     }
 }
